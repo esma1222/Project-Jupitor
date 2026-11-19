@@ -112,7 +112,21 @@ ${error ? '<div class="err" role="alert">Falsches Passwort. / Wrong password.</d
   });
 }
 
+// Kill switch: the site is deactivated. Nothing is served (no login page, no app files, no images).
+// To reactivate, set SITE_ACTIVE=true in Vercel (Settings, Environment Variables) and redeploy,
+// or change the default below to true.
+function siteActive(): boolean {
+  const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.SITE_ACTIVE;
+  return env === 'true';
+}
+
 export default async function middleware(req: Request): Promise<Response> {
+  if (!siteActive()) {
+    return new Response('This site is not available.', {
+      status: 410,
+      headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', 'x-robots-tag': 'noindex, nofollow' },
+    });
+  }
   const url = new URL(req.url);
 
   // Public, non-confidential files needed by the login page itself.

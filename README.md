@@ -1,5 +1,9 @@
 # Projekt Jupiter: Werttreiberbaum und Szenarioplanung
 
+**Status: deactivated.** `middleware.ts` answers every request with 410 "This site is not
+available." To reactivate, set `SITE_ACTIVE=true` in Vercel (Settings, Environment Variables)
+and redeploy.
+
 Two pages, German and English, behind a site password:
 
 - `/` Werttreiberbaum (value driver tree revenue to EBITDA, plan bridge)

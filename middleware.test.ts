@@ -3,6 +3,7 @@ import middleware from './middleware';
 
 // Test password via the SITE_PASSWORD override; the real password is never written into the repo.
 process.env.SITE_PASSWORD = 'test-password-123';
+process.env.SITE_ACTIVE = 'true';
 
 const html = (path: string, cookie?: string) =>
   new Request('https://x.test' + path, { headers: { accept: 'text/html', ...(cookie ? { cookie } : {}) } });
@@ -58,6 +59,16 @@ describe('password gate (asked on every open)', () => {
     expect(await isLogin(await middleware(html('/')))).toBe(true);
     expect((await middleware(post('test-password-123'))).status).toBe(401);
     process.env.SITE_PASSWORD = saved;
+  });
+
+  it('serves nothing while the site is deactivated', async () => {
+    process.env.SITE_ACTIVE = 'false';
+    for (const path of ['/', '/szenarioplanung', '/assets/index-abc.js', '/img/bg-dark.jpg']) {
+      const r = await middleware(new Request('https://x.test' + path, { headers: { accept: 'text/html' } }));
+      expect(r.status).toBe(410);
+      expect(await r.text()).toBe('This site is not available.');
+    }
+    process.env.SITE_ACTIVE = 'true';
   });
 
   it('lets login-page images through', async () => {
